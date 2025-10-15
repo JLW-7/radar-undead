@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 8 STEAM Survival</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .header {
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+            margin-bottom: 10px;
+            font-size: 3rem;
+        }
+        
+        .subtitle {
+            color: #0ff;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #0ff;
+        }
+        
+        .instructions {
+            color: #0a0;
+            margin: 10px 0 20px;
+            font-size: 1rem;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .radar-container {
+            position: relative;
+            width: 650px;
+            height: 650px;
+        }
+        
+        #radarCanvas {
+            border: 3px solid #0f0;
+            background: rgba(0, 20, 0, 0.3);
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 0 20px #0f0;
+        }
+        
+        .controls-panel {
+            background: rgba(0, 20, 0, 0.3);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 25px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 0 15px #0f0;
+        }
+        
+        .panel-section {
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            color: #0f0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #0f0;
+            padding-bottom: 8px;
+        }
+        
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 14px 22px;
+            margin: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #0c0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
+        }
+        
+        button:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #status {
+            color: #ff0;
+            font-size: 1.2rem;
+            height: 35px;
+            margin: 8px 0;
+            text-shadow: 0 0 5px #ff0;
+        }
+        
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        
+        .stat {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #0f0;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .hit-feedback {
+            position: absolute;
+            color: #ff0;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+            font-size: 28px;
+            z-index: 1000;
+            text-shadow: 0 0 5px #ff0;
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-60px); opacity: 0; }
+        }
+        
+        .zombieAlert {
+            color: #f00;
+            font-size: 1.8rem;
+            font-weight: bold;
+            animation: blink 0.5s infinite;
+            margin: 15px 0;
+            text-shadow: 0 0 10px #f00;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+        
+        .distance-indicator {
+            padding: 12px;
+            background: rgba(0, 20, 0, 0.5);
+            border-radius: 8px;
+            margin: 12px 0;
+            border: 1px solid #0f0;
+        }
+        
+        .distance-reading {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0ff;
+            margin: 8px 0;
+            text-shadow: 0 0 8px #0ff;
+        }
+        
+        .countdown {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f00;
+            margin: 15px 0;
+            animation: pulse 1s infinite;
+            text-shadow: 0 0 10px #f00;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .win-message, .game-over-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            width: 500px;
+        }
+        
+        .win-message {
+            border: 4px solid #0f0;
+            box-shadow: 0 0 30px #0f0;
+        }
+        
+        .game-over-message {
+            border: 4px solid #f00;
+            box-shadow: 0 0 30px #f00;
+        }
+        
+        .win-message h2, .game-over-message h2 {
+            font-size: 3rem;
+            margin-bottom: 25px;
+        }
+        
+        .win-message h2 {
+            color: #0f0;
+            text-shadow: 0 0 15px #0f0;
+        }
+        
+        .game-over-message h2 {
+            color: #f00;
+            text-shadow: 0 0 15px #f00;
+        }
+        
+        .sound-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        
+        .sound-btn {
+            width: 48%;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        
+        .health-bar-container {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border: 2px solid #0f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .health-bar {
+            height: 100%;
+            background: #0f0;
+            width: 100%;
+            transition: width 0.3s;
+        }
+        
+        .health-low {
+            background: #f00;
+            animation: healthPulse 0.5s infinite;
+        }
+        
+        @keyframes healthPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .status-container {
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .difficulty-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        
+        .difficulty-btn {
+            width: 32%;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .difficulty-active {
+            background: #ff0;
+            color: #000;
+        }
+        
+        .center-zone {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #f00;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+        
+        .warning-text {
+            color: #f00;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            animation: warningPulse 2s infinite;
+        }
+        
+        @keyframes warningPulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .connection-status {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .connected {
+            background: rgba(0, 255, 0, 0.2);
+            color: #0f0;
+            border: 1px solid #0f0;
+        }
+        
+        .disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            color: #f00;
+            border: 1px solid #f00;
+        }
+        
+        .steam-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+        
+        .spawn-info {
+            color: #0ff;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GRADE 8 STEAM SURVIVAL</h1>
+            <div class="subtitle">Zombie Radar Defense System</div>
+            <div class="steam-badge">SCIENCE • TECHNOLOGY • ENGINEERING • ARTS • MATHEMATICS</div>
+            <div class="instructions">Connect Arduino with ultrasonic sensor | Zombies spawn from sensor AND randomly | Click on zombies to shoot!</div>
+        </div>
+        
+        <div class="status-container">
+            <div id="status">Click "Connect Arduino" to begin</div>
+        </div>
+        
+        <div class="game-area">
+            <div class="radar-container">
+                <canvas id="radarCanvas" width="650" height="650"></canvas>
+                <div class="center-zone" id="centerZone"></div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="panel-section">
+                    <div class="section-title">🔌 ARDUINO CONNECTION</div>
+                    <div id="connectionStatus" class="connection-status disconnected">
+                        🔴 Arduino Disconnected
+                    </div>
+                    <button id="connectBtn">🔌 Connect Arduino</button>
+                    <button id="disconnectBtn" disabled>❌ Disconnect</button>
+                    <button id="startGame" disabled>🚀 Start Game</button>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">🎯 DISTANCE INDICATOR</div>
+                    <div class="distance-indicator">
+                        <div class="distance-reading"><span id="currentDistance">0</span> cm</div>
+                        <div>Move object in front of sensor</div>
+                        <div class="spawn-info">Objects create zombies at random times!</div>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">⚙️ DIFFICULTY</div>
+                    <div class="difficulty-controls">
+                        <button id="easyBtn" class="difficulty-btn difficulty-active">Easy</button>
+                        <button id="mediumBtn" class="difficulty-btn">Medium</button>
+                        <button id="hardBtn" class="difficulty-btn">Hard</button>
+                    </div>
+                    <div style="color: #ff0; font-size: 0.9rem; margin-top: 8px;">
+                        Higher difficulty = More frequent zombie spawns
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">📊 GAME STATS</div>
+                    <div class="game-stats">
+                        <div class="stat">Score: <span id="scoreValue">0</span></div>
+                        <div class="stat">Zombies: <span id="zombiesKilled">0</span></div>
+                        <div class="stat">Health: <span id="health">100</span>%</div>
+                        <div class="stat">Active: <span id="activeZombies">0</span></div>
+                    </div>
+                    
+                    <div class="health-bar-container">
+                        <div id="healthBar" class="health-bar"></div>
+                    </div>
+                    <div class="warning-text">Health decreases when zombies reach center!</div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">🔊 SOUND CONTROLS</div>
+                    <div class="sound-controls">
+                        <button id="soundToggle" class="sound-btn">🔊 Sound: ON</button>
+                        <button id="musicToggle" class="sound-btn">🎵 Music: ON</button>
+                    </div>
+                </div>
+                
+                <button id="restartGame" style="background: #ff0; color: #000;">🔄 Restart Game</button>
+            </div>
+        </div>
+        
+        <div id="zombieAlert" class="zombieAlert" style="display: none;">🚨 ZOMBIES DETECTED! 🚨</div>
+        
+        <div id="winMessage" class="win-message">
+            <h2>🎉 VICTORY! 🎉</h2>
+            <p>All zombies eliminated!</p>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button id="playAgain">Play Again</button>
+        </div>
+        
+        <div id="gameOverMessage" class="game-over-message">
+            <h2>☠️ GAME OVER ☠️</h2>
+            <p>You have been overwhelmed by zombies!</p>
+            <p>Final Score: <span id="gameOverScore">0</span></p>
+            <button id="restartAfterGameOver">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        class ZombieRadarGame {
+            constructor() {
+                this.canvas = document.getElementById('radarCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.port = null;
+                this.reader = null;
+                this.isReading = false;
+                this.dataBuffer = '';
+                
+                // Game state
+                this.score = 0;
+                this.zombiesKilled = 0;
+                this.health = 100;
+                this.zombies = [];
+                this.activeZombies = 0;
+                this.soundEnabled = true;
+                this.musicEnabled = true;
+                this.lastHealthDamage = 0;
+                this.healthDamageRate = 1000; // Damage every second per zombie
+                this.gameActive = false;
+                this.angle = 0;
+                this.distance = 0;
+                this.sweepDirection = 1; // 1 for clockwise, -1 for counter-clockwise
+                this.lastRandomSpawn = 0;
+                this.lastSensorSpawn = 0;
+                this.randomSpawnRate = 3000; // Base time between random zombie spawns in ms
+                this.sensorSpawnRate = 2000; // Base time between sensor zombie spawns in ms
+                this.difficulty = 'easy'; // easy, medium, hard
+                this.centerZoneRadius = 40; // Radius of center zone where health decreases
+                this.outerCircleDistance = 45; // Distance where zombies always spawn
+                this.sensorObjectDetected = false;
+                this.lastObjectDetection = 0;
+                
+                // Audio context and buffers
+                this.audioContext = null;
+                this.gunshotBuffer = null;
+                this.zombieHitBuffer = null;
+                this.zombieGroanBuffer = null;
+                this.winMusicBuffer = null;
+                this.gameOverBuffer = null;
+                this.musicSource = null;
+                
+                this.initAudio();
+                this.setupEventListeners();
+                this.startAnimation();
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createSoundEffects();
+                } catch (e) {
+                    console.log('Web Audio API not supported:', e);
+                    this.soundEnabled = false;
+                    this.musicEnabled = false;
+                    document.getElementById('soundToggle').textContent = '🔊 Sound: NOT SUPPORTED';
+                    document.getElementById('musicToggle').textContent = '🎵 Music: NOT SUPPORTED';
+                    document.getElementById('soundToggle').disabled = true;
+                    document.getElementById('musicToggle').disabled = true;
+                }
+            }
+            
+            createSoundEffects() {
+                // Create gunshot sound
+                this.gunshotBuffer = this.createGunshotSound();
+                
+                // Create zombie hit sound
+                this.zombieHitBuffer = this.createZombieHitSound();
+                
+                // Create zombie groan sound
+                this.zombieGroanBuffer = this.createZombieGroanSound();
+                
+                // Create win music
+                this.winMusicBuffer = this.createWinMusic();
+                
+                // Create game over sound
+                this.gameOverBuffer = this.createGameOverSound();
+            }
+            
+            createGunshotSound() {
+                const duration = 0.3;
+                const sampleRate = this.audioContext.sampleRate;
+                const frameCount = sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, frameCount, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    const noise = Math.random() * 2 - 1;
+                    const envelope = Math.exp(-t * 20);
+                    data[i] = noise * envelope * 0.5;
+                }
+                return buffer;
+            }
+            
+            createZombieHitSound() {
+                const duration = 0.4;
+                const sampleRate = this.audioContext.sampleRate;
+                const frameCount = sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, frameCount, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    const freq = 60 * Math.exp(-t * 8);
+                    const wave = Math.sin(t * Math.PI * 2 * freq);
+                    const envelope = Math.exp(-t * 10);
+                    data[i] = wave * envelope * 0.4;
+                }
+                return buffer;
+            }
+            
+            createZombieGroanSound() {
+                const duration = 1.2;
+                const sampleRate = this.audioContext.sampleRate;
+                const frameCount = sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, frameCount, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    const freq = 80 + Math.sin(t * 3) * 20;
+                    const wave = Math.sin(t * Math.PI * 2 * freq);
+                    const noise = Math.random() * 0.3;
+                    const envelope = Math.min(t * 3, 1) * (1 - t/duration);
+                    data[i] = (wave * 0.7 + noise) * envelope * 0.4;
+                }
+                return buffer;
+            }
+            
+            createWinMusic() {
+                const duration = 5;
+                const sampleRate = this.audioContext.sampleRate;
+                const frameCount = sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, frameCount, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                // Create a victory fanfare
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    let wave = 0;
+                    
+                    // First note (C)
+                    if (t < 0.5) {
+                        wave = Math.sin(t * Math.PI * 2 * 523.25) * 0.3;
+                    }
+                    // Second note (E)
+                    else if (t < 1.0) {
+                        wave = Math.sin(t * Math.PI * 2 * 659.25) * 0.3;
+                    }
+                    // Third note (G)
+                    else if (t < 1.5) {
+                        wave = Math.sin(t * Math.PI * 2 * 783.99) * 0.3;
+                    }
+                    // Fourth note (high C)
+                    else if (t < 2.0) {
+                        wave = Math.sin(t * Math.PI * 2 * 1046.5) * 0.3;
+                    }
+                    // Fifth note (high E)
+                    else if (t < 2.5) {
+                        wave = Math.sin(t * Math.PI * 2 * 1318.51) * 0.3;
+                    }
+                    // Sixth note (high G)
+                    else if (t < 3.0) {
+                        wave = Math.sin(t * Math.PI * 2 * 1567.98) * 0.3;
+                    }
+                    // Final chord
+                    else if (t < 5.0) {
+                        wave = (
+                            Math.sin(t * Math.PI * 2 * 523.25) * 0.2 +
+                            Math.sin(t * Math.PI * 2 * 659.25) * 0.2 +
+                            Math.sin(t * Math.PI * 2 * 783.99) * 0.2
+                        );
+                    }
+                    
+                    const envelope = Math.exp(-t * 0.5);
+                    data[i] = wave * envelope;
+                }
+                return buffer;
+            }
+            
+            createGameOverSound() {
+                const duration = 3;
+                const sampleRate = this.audioContext.sampleRate;
+                const frameCount = sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, frameCount, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                // Create a somber game over sound
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    const freq = 110 * Math.exp(-t * 1.5); // Descending pitch
+                    const wave = Math.sin(t * Math.PI * 2 * freq);
+                    const envelope = Math.exp(-t * 2);
+                    data[i] = wave * envelope * 0.5;
+                }
+                return buffer;
+            }
+            
+            playSound(buffer, volume = 1.0) {
+                if (!this.soundEnabled || !this.audioContext) return;
+                try {
+                    const source = this.audioContext.createBufferSource();
+                    const gainNode = this.audioContext.createGain();
+                    source.buffer = buffer;
+                    gainNode.gain.value = volume;
+                    source.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    source.start(0);
+                } catch (e) {
+                    console.log('Error playing sound:', e);
+                }
+            }
+            
+            playWinMusic() {
+                if (!this.musicEnabled || !this.audioContext) return;
+                try {
+                    this.playSound(this.winMusicBuffer, 0.5);
+                } catch (e) {
+                    console.log('Error playing win music:', e);
+                }
+            }
+            
+            playGameOverSound() {
+                if (!this.musicEnabled || !this.audioContext) return;
+                try {
+                    this.playSound(this.gameOverBuffer, 0.5);
+                } catch (e) {
+                    console.log('Error playing game over sound:', e);
+                }
+            }
+            
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                document.getElementById('soundToggle').textContent = 
+                    this.soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+            }
+            
+            toggleMusic() {
+                this.musicEnabled = !this.musicEnabled;
+                document.getElementById('musicToggle').textContent = 
+                    this.musicEnabled ? '🎵 Music: ON' : '🎵 Music: OFF';
+            }
+            
+            setupEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+                document.getElementById('startGame').addEventListener('click', () => this.startGame());
+                document.getElementById('restartGame').addEventListener('click', () => this.restartGame());
+                document.getElementById('playAgain').addEventListener('click', () => this.restartGame());
+                document.getElementById('restartAfterGameOver').addEventListener('click', () => this.restartGame());
+                document.getElementById('soundToggle').addEventListener('click', () => this.toggleSound());
+                document.getElementById('musicToggle').addEventListener('click', () => this.toggleMusic());
+                
+                // Difficulty buttons
+                document.getElementById('easyBtn').addEventListener('click', () => this.setDifficulty('easy'));
+                document.getElementById('mediumBtn').addEventListener('click', () => this.setDifficulty('medium'));
+                document.getElementById('hardBtn').addEventListener('click', () => this.setDifficulty('hard'));
+                
+                // Add click event for shooting
+                this.canvas.addEventListener('click', (event) => this.handleShoot(event));
+            }
+            
+            setDifficulty(level) {
+                this.difficulty = level;
+                
+                // Update button styles
+                document.getElementById('easyBtn').classList.remove('difficulty-active');
+                document.getElementById('mediumBtn').classList.remove('difficulty-active');
+                document.getElementById('hardBtn').classList.remove('difficulty-active');
+                document.getElementById(level + 'Btn').classList.add('difficulty-active');
+                
+                // Adjust zombie spawn rates based on difficulty
+                switch(level) {
+                    case 'easy':
+                        this.randomSpawnRate = 3000; // 3 seconds between random spawns
+                        this.sensorSpawnRate = 4000; // 4 seconds between sensor spawns
+                        break;
+                    case 'medium':
+                        this.randomSpawnRate = 1800; // 1.8 seconds between random spawns
+                        this.sensorSpawnRate = 2500; // 2.5 seconds between sensor spawns
+                        break;
+                    case 'hard':
+                        this.randomSpawnRate = 1000; // 1 second between random spawns
+                        this.sensorSpawnRate = 1500; // 1.5 seconds between sensor spawns
+                        break;
+                }
+                
+                this.updateStatus(`Difficulty set to ${level.toUpperCase()} - More zombies from both sources!`);
+            }
+            
+            async connect() {
+                try {
+                    if (!('serial' in navigator)) {
+                        this.updateStatus('❌ Web Serial API not supported. Use Chrome or Edge browser.');
+                        return;
+                    }
+                    
+                    this.updateStatus('🔍 Selecting Arduino port...');
+                    this.port = await navigator.serial.requestPort();
+                    
+                    this.updateStatus('📡 Connecting to Arduino...');
+                    await this.port.open({ 
+                        baudRate: 9600,
+                        dataBits: 8,
+                        stopBits: 1,
+                        parity: 'none'
+                    });
+                    
+                    this.updateStatus('✅ Connected! Click "Start Game" to begin');
+                    document.getElementById('connectBtn').disabled = true;
+                    document.getElementById('disconnectBtn').disabled = false;
+                    document.getElementById('startGame').disabled = false;
+                    document.getElementById('connectionStatus').className = 'connection-status connected';
+                    document.getElementById('connectionStatus').innerHTML = '🟢 Arduino Connected';
+                    
+                    this.startReading();
+                    
+                } catch (error) {
+                    if (error.name === 'NotFoundError') {
+                        this.updateStatus('❌ No Arduino selected. Please try again.');
+                    } else {
+                        this.updateStatus(`❌ Connection error: ${error.message}`);
+                    }
+                }
+            }
+            
+            async startReading() {
+                this.isReading = true;
+                const decoder = new TextDecoder();
+                
+                while (this.port?.readable && this.isReading) {
+                    this.reader = this.port.readable.getReader();
+                    
+                    try {
+                        while (true) {
+                            const { value, done } = await this.reader.read();
+                            if (done) break;
+                            
+                            // Append new data to buffer
+                            this.dataBuffer += decoder.decode(value);
+                            
+                            // Process complete lines
+                            const lines = this.dataBuffer.split('\n');
+                            this.dataBuffer = lines.pop() || ''; // Keep incomplete line
+                            
+                            for (const line of lines) {
+                                const trimmedLine = line.trim();
+                                if (trimmedLine && trimmedLine.includes(',')) {
+                                    const parts = trimmedLine.split(',');
+                                    if (parts.length >= 2) {
+                                        this.angle = parseInt(parts[0]) || 0;
+                                        this.distance = parseInt(parts[1]) || 0;
+                                        
+                                        // Update distance display
+                                        document.getElementById('currentDistance').textContent = this.distance;
+                                        
+                                        // Track object detection for sensor-based spawning
+                                        if (this.distance > 0 && this.distance < 50) {
+                                            this.sensorObjectDetected = true;
+                                            this.lastObjectDetection = Date.now();
+                                        } else {
+                                            this.sensorObjectDetected = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Read error:', error);
+                        this.updateStatus('❌ Read error - check connection');
+                    } finally {
+                        this.reader.releaseLock();
+                    }
+                }
+            }
+            
+            startGame() {
+                this.gameActive = true;
+                this.score = 0;
+                this.zombiesKilled = 0;
+                this.health = 100;
+                this.zombies = [];
+                this.activeZombies = 0;
+                this.angle = 0;
+                this.updateDisplay();
+                this.updateStatus('Game started! Zombies spawning from sensor AND randomly...');
+                document.getElementById('centerZone').style.display = 'block';
+                document.getElementById('startGame').disabled = true;
+            }
+            
+            handleShoot(event) {
+                if (!this.gameActive) return;
+                
+                // Get mouse position relative to canvas
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                // Convert mouse coordinates to radar coordinates (angle and distance)
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const dx = x - centerX;
+                const dy = centerY - y; // Invert Y axis for radar display
+                
+                // Calculate angle in degrees (0 to 180)
+                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                if (angle < 0) angle += 360;
+                if (angle > 180) angle = 360 - angle;
+                
+                // Calculate distance (in pixels, then convert to cm)
+                const distancePixels = Math.sqrt(dx*dx + dy*dy);
+                const maxDistancePixels = Math.min(centerX, centerY);
+                const distance = (distancePixels / maxDistancePixels) * 50; // Scale to 50cm max
+                
+                // Check if any zombie is at this angle and distance (with some tolerance)
+                const toleranceAngle = 15; // degrees
+                const toleranceDistance = 10; // cm
+                
+                let hit = false;
+                
+                for (let i = 0; i < this.zombies.length; i++) {
+                    const zombie = this.zombies[i];
+                    const angleDiff = Math.abs(angle - zombie.angle);
+                    const distanceDiff = Math.abs(distance - zombie.distance);
+                    
+                    if (angleDiff <= toleranceAngle && distanceDiff <= toleranceDistance) {
+                        // Hit!
+                        hit = true;
+                        this.score += 10;
+                        this.zombiesKilled++;
+                        this.activeZombies--;
+                        
+                        // Remove the zombie
+                        this.zombies.splice(i, 1);
+                        
+                        // Visual feedback for hit
+                        this.createHitFeedback(x, y, 'HIT! +10');
+                        
+                        // Play hit sound
+                        this.playSound(this.zombieHitBuffer, 0.7);
+                        
+                        // Update display
+                        this.updateDisplay();
+                        
+                        // Check for win condition
+                        if (this.activeZombies === 0) {
+                            this.showWinMessage();
+                        }
+                        
+                        break;
+                    }
+                }
+                
+                if (!hit) {
+                    // Miss
+                    this.createHitFeedback(x, y, 'MISS!');
+                    this.updateStatus('Miss! Aim for the red dots.');
+                }
+                
+                // Always play gunshot sound
+                this.playSound(this.gunshotBuffer, 0.6);
+            }
+            
+            createHitFeedback(x, y, text) {
+                const feedback = document.createElement('div');
+                feedback.className = 'hit-feedback';
+                feedback.textContent = text;
+                feedback.style.left = (x + this.canvas.getBoundingClientRect().left) + 'px';
+                feedback.style.top = (y + this.canvas.getBoundingClientRect().top) + 'px';
+                document.body.appendChild(feedback);
+                
+                setTimeout(() => {
+                    document.body.removeChild(feedback);
+                }, 1000);
+            }
+            
+            updateDisplay() {
+                document.getElementById('scoreValue').textContent = this.score;
+                document.getElementById('zombiesKilled').textContent = this.zombiesKilled;
+                document.getElementById('health').textContent = this.health;
+                document.getElementById('activeZombies').textContent = this.activeZombies;
+                
+                // Update health bar
+                const healthBar = document.getElementById('healthBar');
+                healthBar.style.width = `${this.health}%`;
+                
+                // Change color based on health level
+                if (this.health <= 30) {
+                    healthBar.className = 'health-bar health-low';
+                } else if (this.health <= 60) {
+                    healthBar.className = 'health-bar';
+                    healthBar.style.background = '#ff0';
+                } else {
+                    healthBar.className = 'health-bar';
+                    healthBar.style.background = '#0f0';
+                }
+                
+                // Show/hide zombie alert
+                const zombieAlert = document.getElementById('zombieAlert');
+                if (this.activeZombies > 0) {
+                    zombieAlert.style.display = 'block';
+                } else {
+                    zombieAlert.style.display = 'none';
+                }
+            }
+            
+            updateStatus(message) {
+                document.getElementById('status').innerHTML = message;
+            }
+            
+            showWinMessage() {
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('winMessage').style.display = 'block';
+                this.playWinMusic();
+                this.gameActive = false;
+                document.getElementById('centerZone').style.display = 'none';
+            }
+            
+            showGameOverMessage() {
+                document.getElementById('gameOverScore').textContent = this.score;
+                document.getElementById('gameOverMessage').style.display = 'block';
+                this.playGameOverSound();
+                this.gameActive = false;
+                document.getElementById('centerZone').style.display = 'none';
+            }
+            
+            updateZombies() {
+                if (!this.gameActive) return;
+                
+                const now = Date.now();
+                
+                // Move zombies closer to player (slower movement)
+                this.zombies.forEach(zombie => {
+                    // Move zombie closer to player (reduce distance) - SLOWER
+                    if (zombie.distance > 5) {
+                        zombie.distance -= 0.02; // Much slower movement toward player
+                    }
+                    
+                    // Apply health damage only when zombie reaches center zone
+                    if (zombie.distance <= 10) { // Center zone threshold
+                        if (now - this.lastHealthDamage > this.healthDamageRate) {
+                            this.health = Math.max(0, this.health - 5); // Fixed damage when in center
+                            this.updateDisplay();
+                            
+                            // Check for game over
+                            if (this.health <= 0) {
+                                this.health = 0;
+                                this.updateDisplay();
+                                this.showGameOverMessage();
+                            }
+                        }
+                    }
+                });
+                
+                // Update last damage time
+                if (now - this.lastHealthDamage > this.healthDamageRate) {
+                    this.lastHealthDamage = now;
+                }
+                
+                // Spawn random zombies at random times
+                if (now - this.lastRandomSpawn > this.randomSpawnRate) {
+                    this.spawnRandomZombie();
+                    this.lastRandomSpawn = now;
+                }
+                
+                // Spawn sensor-based zombies at random times when object is detected
+                if (this.sensorObjectDetected && now - this.lastSensorSpawn > this.sensorSpawnRate) {
+                    this.spawnSensorZombie();
+                    this.lastSensorSpawn = now;
+                }
+            }
+            
+            spawnRandomZombie() {
+                if (!this.gameActive) return;
+                
+                // Random angle along the current sweep
+                const randomAngle = Math.floor(Math.random() * 181); // 0-180 degrees
+                
+                // Always spawn at outer circle distance
+                const spawnDistance = this.outerCircleDistance;
+                
+                // Create new random zombie
+                const zombie = {
+                    angle: randomAngle,
+                    distance: spawnDistance,
+                    spawnTime: Date.now(),
+                    type: 'random'
+                };
+                
+                this.zombies.push(zombie);
+                this.activeZombies++;
+                
+                // Play zombie sound occasionally
+                if (Math.random() < 0.3) {
+                    this.playSound(this.zombieGroanBuffer, 0.5);
+                }
+            }
+            
+            spawnSensorZombie() {
+                if (!this.gameActive || !this.sensorObjectDetected) return;
+                
+                // Use current sensor angle
+                const sensorAngle = this.angle;
+                
+                // Always spawn at outer circle distance
+                const spawnDistance = this.outerCircleDistance;
+                
+                // Create sensor-based zombie
+                const zombie = {
+                    angle: sensorAngle,
+                    distance: spawnDistance,
+                    spawnTime: Date.now(),
+                    type: 'sensor'
+                };
+                
+                this.zombies.push(zombie);
+                this.activeZombies++;
+                
+                // Play zombie sound occasionally
+                if (Math.random() < 0.4) {
+                    this.playSound(this.zombieGroanBuffer, 0.6);
+                }
+                
+                // Show status message occasionally
+                if (Math.random() < 0.2) {
+                    this.updateStatus('Sensor detected object! Zombie spawned!');
+                }
+            }
+            
+            async disconnect() {
+                this.isReading = false;
+                this.gameActive = false;
+                
+                if (this.reader) {
+                    await this.reader.cancel();
+                }
+                
+                if (this.port) {
+                    await this.port.close();
+                }
+                
+                this.updateStatus('🔴 Disconnected from Arduino');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('startGame').disabled = true;
+                document.getElementById('connectionStatus').className = 'connection-status disconnected';
+                document.getElementById('connectionStatus').innerHTML = '🔴 Arduino Disconnected';
+                document.getElementById('centerZone').style.display = 'none';
+            }
+            
+            restartGame() {
+                this.score = 0;
+                this.zombiesKilled = 0;
+                this.health = 100;
+                this.zombies = [];
+                this.activeZombies = 0;
+                this.gameActive = false;
+                document.getElementById('winMessage').style.display = 'none';
+                document.getElementById('gameOverMessage').style.display = 'none';
+                document.getElementById('centerZone').style.display = 'none';
+                document.getElementById('startGame').disabled = !this.port;
+                this.updateDisplay();
+                this.updateStatus(this.port ? 'Click "Start Game" to begin' : 'Click "Connect Arduino" to begin');
+            }
+            
+            drawRadar() {
+                const ctx = this.ctx;
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 30;
+                
+                // Clear canvas with dark green background
+                ctx.fillStyle = '#001100';
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw radar semicircle
+                ctx.fillStyle = 'rgba(0, 20, 0, 0.3)';
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, Math.PI, 0, false);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw concentric circles
+                ctx.strokeStyle = '#0f0';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([]);
+                
+                for (let i = 1; i <= 5; i++) {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius * i / 5, Math.PI, 0, false);
+                    ctx.stroke();
+                    
+                    // Distance labels
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`${i * 10}cm`, centerX + radius * i / 5 + 10, centerY + 6);
+                }
+                
+                // Draw angle lines (every 30 degrees)
+                ctx.strokeStyle = '#0a0';
+                ctx.lineWidth = 1;
+                for (let angle = 0; angle <= 180; angle += 30) {
+                    const rad = angle * Math.PI / 180;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(
+                        centerX + Math.cos(rad) * radius,
+                        centerY - Math.sin(rad) * radius
+                    );
+                    ctx.stroke();
+                    
+                    // Angle labels
+                    if (angle % 60 === 0) {
+                        const text = angle === 0 ? '0°' : angle === 60 ? '60°' : angle === 120 ? '120°' : '180°';
+                        const labelX = centerX + Math.cos(rad) * (radius + 20);
+                        const labelY = centerY - Math.sin(rad) * (radius + 20);
+                        ctx.fillText(text, labelX - 12, labelY + 6);
+                    }
+                }
+                
+                // Update radar sweep angle (if not using sensor data)
+                if (!this.port || !this.isReading) {
+                    this.angle += this.sweepDirection * 1.5;
+                    if (this.angle >= 180 || this.angle <= 0) {
+                        this.sweepDirection *= -1;
+                    }
+                }
+                
+                // Draw sweep line
+                const sweepRad = this.angle * Math.PI / 180;
+                
+                // Main sweep line
+                ctx.strokeStyle = '#0f0';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(
+                    centerX + Math.cos(sweepRad) * radius,
+                    centerY - Math.sin(sweepRad) * radius
+                );
+                ctx.stroke();
+                
+                // Draw center danger zone
+                ctx.strokeStyle = '#f00';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, this.centerZoneRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw player position
+                ctx.fillStyle = '#0f0';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw zombies (all red now, larger size)
+                this.zombies.forEach(zombie => {
+                    const zombieRad = zombie.angle * Math.PI / 180;
+                    const zombieDist = (zombie.distance / 50) * radius;
+                    const zombieX = centerX + Math.cos(zombieRad) * zombieDist;
+                    const zombieY = centerY - Math.sin(zombieRad) * zombieDist;
+                    
+                    // Zombie dot with glow (all red now)
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = '#f00';
+                    ctx.fillStyle = '#f00';
+                    ctx.beginPath();
+                    ctx.arc(zombieX, zombieY, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Pulsing effect for zombies (larger)
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 3;
+                    const pulseSize = 18 + Math.sin(Date.now() / 200) * 4;
+                    ctx.beginPath();
+                    ctx.arc(zombieX, zombieY, pulseSize, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    ctx.shadowBlur = 0;
+                    
+                    // Draw distance text near zombie
+                    ctx.fillStyle = '#ff0';
+                    ctx.font = '14px monospace';
+                    ctx.fillText(Math.round(zombie.distance) + 'cm', zombieX - 18, zombieY - 20);
+                    
+                    // Highlight zombies in center danger zone
+                    if (zombie.distance <= 10) {
+                        ctx.strokeStyle = '#ff0';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(zombieX, zombieY, 25, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                });
+                
+                // Draw game info
+                ctx.fillStyle = '#0f0';
+                ctx.font = '18px monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Score: ${this.score}`, 25, 35);
+                ctx.fillText(`Zombies: ${this.zombiesKilled}`, 25, 60);
+                ctx.fillText(`Health: ${this.health}%`, 25, 85);
+                ctx.fillText(`Active: ${this.activeZombies}`, 25, 110);
+                ctx.fillText(`Difficulty: ${this.difficulty.toUpperCase()}`, 25, 135);
+                
+                // Draw connection status on radar
+                if (this.port && this.isReading) {
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = '16px monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText('ARDUINO CONNECTED', this.canvas.width - 25, 35);
+                    
+                    // Show sensor status
+                    if (this.sensorObjectDetected) {
+                        ctx.fillStyle = '#ff0';
+                        ctx.fillText('OBJECT DETECTED', this.canvas.width - 25, 60);
+                    }
+                }
+            }
+            
+            startAnimation() {
+                const animate = () => {
+                    this.updateZombies();
+                    this.drawRadar();
+                    requestAnimationFrame(animate);
+                };
+                animate();
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ZombieRadarGame();
+        });
+    </script>
+</body>
+</html>
