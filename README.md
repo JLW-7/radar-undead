@@ -23,9 +23,9 @@
 - **Web Audio API** – Custom sound effects and music generation  
 - **Web Serial API** – Arduino connection and sensor data input  
 
-## Project Status
+## How To Play
 
-The project is currently **not hosted as a website**. To play, simply clone the repository open the `index.html` file in a modern browser (Chrome or Edge recommended for Web Serial support).
+The project is currently **not hosted as a website, but will be soon**. To play, simply clone the repository open the `index.html` file in a modern browser (Chrome or Edge recommended for Web Serial support).
 
 ## License
 
