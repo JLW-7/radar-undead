@@ -1,4 +1,4 @@
-# Radar Undead
+# 🧭 Radar Undead 💀
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Language: JavaScript](https://img.shields.io/badge/Language-JavaScript-blue.svg)
@@ -34,4 +34,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 ---
 
-Made by July Wu, please star if you find it fun!
+### Made with ⚡️ by July Wu, please star if you find it fun!
