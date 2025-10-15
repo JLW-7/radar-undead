@@ -3,13 +3,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Language: JavaScript](https://img.shields.io/badge/Language-JavaScript-blue.svg)
 
-**Radar Undead** is a thrilling, interactive zombie radar game built with HTML, CSS, and JavaScript. Players defend themselves from zombies appearing both randomly and via sensor input from an Arduino, tracking them on a radar and shooting them down before they reach the center danger zone. 
+**Radar Undead** is an interactive zombie radar game built with HTML, CSS, and JavaScript. Players defend themselves from zombies appearing via sensor input from an Arduino, tracking them on a radar and shooting them down before they reach the center danger zone. 
 
 ## Features
 
 - **Dynamic Radar Display**: A semicircular radar shows approaching zombies with real-time angle and distance updates.  
-- **Arduino Integration**: Zombies can spawn based on objects detected by an Arduino sensor.  
-- **Sensor & Random Spawning**: Zombies appear both randomly and via Arduino sensor input.  
+- **Arduino Integration**: Zombies can spawn randomly based on objects detected by an Arduino sensor.  
 - **Interactive Shooting**: Click on the radar to shoot zombies and earn points.  
 - **Difficulty Levels**: Easy, Medium, and Hard modes affect zombie spawn rates and challenge.  
 - **Health Management**: Zombies reaching the center zone reduce player health. Game ends when health reaches zero.  
