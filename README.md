@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Language: JavaScript](https://img.shields.io/badge/Language-JavaScript-blue.svg)
 
-**Radar Undead** is an interactive zombie radar game built with HTML, CSS, and JavaScript. Players defend themselves from zombies appearing via sensor input from an Arduino, tracking them on a radar and shooting them down before they reach the center danger zone. 
+An interactive zombie radar game built with HTML, CSS, and JavaScript. 
 
 ## Features
 
@@ -25,7 +25,7 @@
 
 ## How To Play
 
-The project is currently **not hosted as a website, but will be soon**. To play, simply clone the repository open the `index.html` file in a modern browser (Chrome or Edge recommended for Web Serial support).
+I wouldn't say this is a serious project, it's simply a game I built for a Grade 8 STEAM class assignment. I mean you'll probably need a complete Arduino kit to play, but if you really want to, simply clone the repository open the `index.html` file in a modern browser (Chrome or Edge recommended for Web Serial support).
 
 ## License
 
@@ -33,4 +33,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 ---
 
-### Made with ⚡️ by July Wu, please star if you find it fun!
+### Made with ⚡️ by July Wu
